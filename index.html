@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DNA Calculator</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DNA Calculator">
+<meta name="theme-color" content="#000">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#000;--f:#000;--l:#2b2b2b;--t:#f5f5f5;--m:#8c8c8c;--ac:#fff;--mo:"JetBrains Mono",ui-monospace,Menlo,monospace;color-scheme:dark;box-sizing:border-box}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+*,*::before,*::after{border-radius:0!important}
+html{height:100%}body{height:100%;background:var(--bg);color:var(--t);font:400 15px/1.45 Montserrat,system-ui,sans-serif;overflow:hidden;
+padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+#root{max-width:480px;height:100%;margin:0 auto;position:relative}
+.scr{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:var(--bg);transition:opacity .8s}
+.scr.on{display:flex;animation:fi .6s both}.scr.off{opacity:0}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.sw{display:flex;flex-direction:column;align-items:center;gap:14px;animation:fi 1s both}
+.wm{font:800 32px Montserrat;letter-spacing:-.03em;display:flex;align-items:center;min-height:1.2em}
+.cur{display:inline-block;width:2px;height:.85em;background:#fff;margin-left:3px;animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.card{width:min(340px,86vw);text-align:center}
+.dots{display:flex;gap:5px;justify-content:center;margin:16px 0 30px}
+.dots i{width:5px;height:5px;background:#333;transition:.3s;display:block}
+.dots i.on{width:26px;background:#fff}
+.stepIcon{width:42px;height:42px;display:block;margin:0 auto 18px;object-fit:contain}
+.stepIcon svg{width:100%;height:100%;color:#fff}
+h1{font:800 27px Montserrat;letter-spacing:-.03em;margin-bottom:6px;min-height:1.3em}
+.card p{font:13px var(--mo);color:var(--m);margin-bottom:22px;min-height:1.4em}
+.fw{display:flex;align-items:center;background:#000;border:2px solid #2b2b2b;height:46px;margin-bottom:16px}
+.fw:focus-within{border-color:#fff}
+.fw input{flex:1;min-width:0;height:100%;background:none;border:0;outline:0;padding:0 14px;font:15px var(--mo)}
+.btn{width:100%;height:46px;background:#fff;color:#000;font:800 14px Montserrat;letter-spacing:.02em;border:2px solid #fff;
+box-shadow:5px 5px 0 #333;transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:7px 7px 0 #444}
+.btn:active{transform:translate(4px,4px);box-shadow:1px 1px 0 #333}
+#lt{font:400 28px Georgia,'Times New Roman',serif;letter-spacing:0;margin:14px 0 20px;text-align:center;min-height:1.3em}
+#langList,#onb2 .card{width:min(380px,90vw)}
+.lr{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border-bottom:1px solid #1c1c1c;cursor:pointer}
+.lr b{font-weight:700;font-size:15px}
+.lr small{color:var(--m);font:11px var(--mo)}
+.lr.sel{background:#fff;color:#000}.lr.sel small{color:#444}
+.rd{width:18px;height:18px;border:2px solid #555;position:relative;flex:none}
+.lr.sel .rd{border-color:#000}.lr.sel .rd::after{content:"";position:absolute;inset:3px;background:#000}
+#app{position:fixed;inset:0;max-width:480px;margin:0 auto;display:none;flex-direction:column;background:var(--bg)}
+#app.on{display:flex}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--l)}
+h2.tt{font:800 20px Montserrat;letter-spacing:-.03em}
+.hdrBtns{display:flex;gap:8px;align-items:center}
+#profBtn,#langBtn{display:flex;gap:6px;align-items:center;border:2px solid var(--l);padding:6px 10px;font:11px var(--mo)}
+#profBtn:hover,#langBtn:hover{background:#1a1a1a}
+#langBtn{color:var(--m)}
+#tabs{display:flex;border-bottom:1px solid var(--l)}
+.tab{flex:1;text-align:center;padding:11px 0;font:11px var(--mo);color:var(--m);border-right:1px solid var(--l)}
+.tab:last-child{border-right:0}.tab.on{background:#fff;color:#000}
+#pages{flex:1;min-height:0;display:flex;overflow:hidden}
+.page{display:none;flex-direction:column;width:100%;min-height:0}.page.on{display:flex}
+#disp,#disp2{padding:10px 20px;text-align:right;border-bottom:1px solid var(--l)}
+#exprLine,#exprLine2{color:var(--m);font:13px var(--mo);min-height:18px;overflow-wrap:anywhere}
+#mainDisp,#mainDisp2{font:800 42px Montserrat;letter-spacing:-.02em;overflow-wrap:anywhere}
+#explain,#explain2{color:var(--t);opacity:.75;font:11px var(--mo);min-height:16px;margin-top:4px}
+#pad,#pad2{padding:8px 8px calc(10px + env(safe-area-inset-bottom,0px));overflow-y:auto}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--l);border:1px solid var(--l);margin-bottom:8px}
+.grid button{aspect-ratio:1.6/1;background:#000;color:var(--t);font:700 16px Montserrat}
+.grid button.fn{font:10.5px var(--mo);color:var(--m)}
+.grid button.op{background:#fff;color:#000;font:800 18px Montserrat}
+.grid button.eq{background:#fff;color:#000;font:800 20px Montserrat}
+.grid button:active{background:#1a1a1a}
+.grid button.op:active,.grid button.eq:active{background:#ccc}
+.active{outline:2px solid #fff}
+#convPad{padding:16px 18px;overflow-y:auto;flex:1}
+#catRow{display:flex;gap:1px;overflow-x:auto;margin-bottom:14px;border:1px solid var(--l);background:var(--l)}
+.cat{flex:0 0 auto;background:#000;padding:8px 12px;font:10.5px var(--mo);color:var(--m);white-space:nowrap}
+.cat.on{background:#fff;color:#000}
+.cfld{border:2px solid #2b2b2b;padding:14px;margin-bottom:2px}
+.cfld .sub{font:11px var(--mo);color:var(--m);margin-bottom:6px}
+.cfld input{background:transparent;border:0;color:var(--t);font:800 22px Montserrat;width:100%}
+.cfld select{background:transparent;border:0;color:var(--t);font:12px var(--mo);margin-top:6px;padding:0}
+#swapBtn{align-self:center;width:38px;height:38px;border:2px solid var(--l);color:var(--t);margin:6px auto}
+#convExplain{color:var(--m);font:11px var(--mo);text-align:center;margin-top:10px}
+.page.on{animation:pgIn .25s ease}
+@keyframes pgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.expRow{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:4px}
+.expRow>div:first-child{flex:1;min-width:0;margin-top:0}
+.expBtn{flex:none;font:10px var(--mo);letter-spacing:.03em;color:var(--m);border:1px solid var(--l);padding:4px 9px}
+.expBtn:active{background:#1a1a1a;color:var(--t)}
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .28s ease;z-index:25}
+.backdrop.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;background:#0d0d0d;border-top:2px solid var(--l);
+ transform:translateY(100%);transition:transform .28s ease;z-index:30;padding:16px 18px calc(16px + env(safe-area-inset-bottom,0px));max-height:60vh;overflow-y:auto}
+.sheet.on{transform:translateY(0)}
+.sheetHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sheetHead b{font:800 15px Montserrat;letter-spacing:.02em}
+.sheetHead button{font:13px var(--mo);color:var(--m);border:2px solid var(--l);width:28px;height:28px}
+.sheetHead button:active{background:#1a1a1a}
+.sheetBody{font:14px/1.6 Montserrat;color:var(--t);min-height:3em}
+.sheetSrc{margin-top:12px;font:10px var(--mo);color:var(--m);text-transform:uppercase;letter-spacing:.04em}
+#histWrap{flex:1;overflow-y:auto;padding:4px 16px}
+.hrow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #1c1c1c}
+.hrow .he{font:11px var(--mo);color:var(--m);margin-bottom:3px;overflow-wrap:anywhere}
+.hrow .hr{font:800 18px Montserrat}
+.hrow button{flex:none;margin-left:12px;font:12px var(--mo);color:var(--m);border:1px solid var(--l);width:26px;height:26px}
+.hrow button:active{background:#1a1a1a}
+.histEmpty{color:var(--m);font:12px var(--mo);padding:20px 0;text-align:center}
+</style></head>
+<body><div id="root">
+
+<div id="sp" class="scr on"><div class="sw">
+<img class="stepIcon" style="width:56px;height:56px" src="icon-192.png" alt="">
+<div class="wm" id="splashType">DNA Calculator</div>
+</div></div>
+
+<div id="onb1" class="scr"><div class="card">
+<img class="stepIcon" src="icon-192.png" alt="">
+<div class="dots"><i class="on"></i><i></i></div>
+<h1 id="onb1Title" data-i18n="onb1_title">What's your name?</h1><p data-i18n="onb1_sub">Your name will be shown in the app</p>
+<div class="fw"><input id="nickIn" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="Name" data-i18n-ph="onb1_placeholder"></div>
+<button class="btn" id="onb1next" data-i18n="onb1_btn">Continue</button>
+</div></div>
+
+<div id="onb2" class="scr"><div class="card" style="width:min(380px,90vw)">
+<div class="stepIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
+<div class="dots"><i></i><i class="on"></i></div>
+<h2 id="lt" data-i18n="onb2_title">Choose your language</h2>
+<div id="langList" style="max-height:44vh;overflow-y:auto;border-top:1px solid #1c1c1c"></div>
+<button class="btn" id="onb2next" data-i18n="onb2_btn">Done</button>
+</div></div>
+
+<div id="app">
+<header><h2 class="tt">DNA Calculator</h2>
+<div class="hdrBtns">
+<button id="langBtn"><span id="pFlag"></span></button>
+<button id="profBtn"><span id="pNick">Guest</span></button>
+</div></header>
+<div id="tabs">
+<div class="tab on" data-p="basic" data-i18n="tab_basic">BASIC</div>
+<div class="tab" data-p="sci" data-i18n="tab_sci">SCIENTIFIC</div>
+<div class="tab" data-p="conv" data-i18n="tab_conv">CONVERTER</div>
+<div class="tab" data-p="hist" data-i18n="tab_hist">HISTORY</div>
+</div>
+<div id="pages">
+
+<div class="page on" id="pg-basic">
+<div id="disp"><div id="exprLine"></div><div id="mainDisp">0</div>
+<div class="expRow"><div id="explain"></div><button class="expBtn" onclick="openExplain('')" data-i18n="explain_btn">Explain</button></div></div>
+<div id="pad"><div class="grid" id="basicGrid"></div></div>
+</div>
+
+<div class="page" id="pg-sci">
+<div id="disp2"><div id="exprLine2"></div><div id="mainDisp2">0</div>
+<div class="expRow"><div id="explain2"></div><button class="expBtn" onclick="openExplain('2')" data-i18n="explain_btn">Explain</button></div></div>
+<div id="pad2"><div class="grid" id="sciGridFull"></div><div class="grid" id="basicGrid2"></div></div>
+</div>
+
+<div class="page" id="pg-conv">
+<div id="convPad">
+<div id="catRow"></div>
+<div class="cfld"><div class="sub" data-i18n="conv_from">FROM</div><input type="text" id="cvFrom" value="1"><select id="unFrom"></select></div>
+<div id="swapBtn">⇅</div>
+<div class="cfld"><div class="sub" data-i18n="conv_to">TO</div><input type="text" id="cvTo" readonly><select id="unTo"></select></div>
+<div id="convExplain"></div>
+</div>
+</div>
+
+<div class="page" id="pg-hist">
+<div id="histWrap"><div id="histList"></div></div>
+<button class="btn" id="histClear" style="margin:10px 16px calc(14px + env(safe-area-inset-bottom,0px));width:calc(100% - 32px)" data-i18n="hist_clear">Clear history</button>
+</div>
+
+</div>
+</div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="langSheet">
+<div class="sheetHead"><b data-i18n="onb2_title">Choose your language</b><button id="langClose">✕</button></div>
+<div id="langList2" style="max-height:50vh;overflow-y:auto"></div>
+</div>
+<div class="sheet" id="expPanel">
+<div class="sheetHead"><b data-i18n="explain_sheet_title">Explain</b><button id="expClose">✕</button></div>
+<div class="sheetBody" id="expBody">—</div>
+<div class="sheetSrc" id="expSrc"></div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+
+/* ===== splash typewriter animation ===== */
+function typeAnim(el,text,speed){
+ speed=speed||65;el.innerHTML='';
+ const cur=document.createElement('span');cur.className='cur';
+ el.appendChild(cur);
+ let i=0;
+ (function step(){
+  if(i<text.length){
+   el.insertBefore(document.createTextNode(text[i]),cur);
+   i++;setTimeout(step,speed);
+  }
+ })();
+}
+$('#splashType').textContent='DNA Calculator';
+
+const LANGUAGES=[
+ ['English','English','en'],['Ukrainian','Українська','uk'],
+ ['German','Deutsch','de'],['French','Français','fr'],['Spanish','Español','es'],
+ ['Polish','Polski','pl'],['Italian','Italiano','it'],['Portuguese','Português','pt'],
+ ['Turkish','Türkçe','tr'],['Chinese','中文','zh'],['Japanese','日本語','ja'],
+];
+
+/* ===== i18n dictionary ===== */
+const I18N={
+ en:{onb1_title:"What's your name?",onb1_sub:"Your name will be shown in the app",onb1_placeholder:"Name",onb1_btn:"Continue",
+  onb2_title:"Choose your language",onb2_btn:"Done",tab_basic:"BASIC",tab_sci:"SCIENTIFIC",tab_conv:"CONVERTER",tab_hist:"HISTORY",
+  explain_btn:"Explain",explain_sheet_title:"Explain",explain_thinking:"Thinking…",explain_builtin_src:"Built-in explanation",explain_ai_src:"AI explanation",
+  hist_empty:"No calculations yet",hist_clear:"Clear history",conv_from:"FROM",conv_to:"TO",profile_prompt:"Your name?",guest:"Guest",
+  cat_currency:"Currency",cat_temperature:"Temperature",cat_length:"Length",cat_weight:"Weight",cat_volume:"Volume",cat_area:"Area",cat_speed:"Speed",cat_time:"Time",cat_data:"Data",
+  conv_rate_note:"rate may be inaccurate",explain_empty:"The display currently shows {r}. Enter numbers and an operation, then tap Explain again.",explain_base:"{b}. Plainly put: the calculator applied that operation to your numbers and arrived at {r}."},
+ uk:{onb1_title:"Як вас звати?",onb1_sub:"Ваше ім'я буде показано в застосунку",onb1_placeholder:"Ім'я",onb1_btn:"Продовжити",
+  onb2_title:"Оберіть мову",onb2_btn:"Готово",tab_basic:"ОСНОВНИЙ",tab_sci:"НАУКОВИЙ",tab_conv:"КОНВЕРТЕР",tab_hist:"ІСТОРІЯ",
+  explain_btn:"Пояснити",explain_sheet_title:"Пояснення",explain_thinking:"Думаю…",explain_builtin_src:"Вбудоване пояснення",explain_ai_src:"Пояснення від ШІ",
+  hist_empty:"Поки що немає обчислень",hist_clear:"Очистити історію",conv_from:"З",conv_to:"У",profile_prompt:"Ваше ім'я?",guest:"Гість",
+  cat_currency:"Валюта",cat_temperature:"Температура",cat_length:"Довжина",cat_weight:"Вага",cat_volume:"Обʼєм",cat_area:"Площа",cat_speed:"Швидкість",cat_time:"Час",cat_data:"Дані",
+  conv_rate_note:"курс може бути неточним",explain_empty:"Зараз на екрані {r}. Введіть числа та операцію, потім знову натисніть «Пояснити».",explain_base:"{b}. Простими словами: калькулятор застосував цю операцію до ваших чисел і отримав {r}."},
+ de:{onb1_title:"Wie heißt du?",onb1_sub:"Dein Name wird in der App angezeigt",onb1_placeholder:"Name",onb1_btn:"Weiter",
+  onb2_title:"Sprache wählen",onb2_btn:"Fertig",tab_basic:"EINFACH",tab_sci:"WISSENSCH.",tab_conv:"UMRECHNER",tab_hist:"VERLAUF",
+  explain_btn:"Erklären",explain_sheet_title:"Erklärung",explain_thinking:"Denke nach…",explain_builtin_src:"Integrierte Erklärung",explain_ai_src:"KI-Erklärung",
+  hist_empty:"Noch keine Berechnungen",hist_clear:"Verlauf löschen",conv_from:"VON",conv_to:"ZU",profile_prompt:"Dein Name?",guest:"Gast",
+  cat_currency:"Währung",cat_temperature:"Temperatur",cat_length:"Länge",cat_weight:"Gewicht",cat_volume:"Volumen",cat_area:"Fläche",cat_speed:"Geschwindigkeit",cat_time:"Zeit",cat_data:"Daten",
+  conv_rate_note:"Kurs kann ungenau sein",explain_empty:"Die Anzeige zeigt aktuell {r}. Gib Zahlen und eine Operation ein und tippe erneut auf „Erklären“.",explain_base:"{b}. Einfach gesagt: Der Rechner hat diese Operation auf deine Zahlen angewendet und {r} erhalten."},
+ fr:{onb1_title:"Quel est ton prénom ?",onb1_sub:"Ton prénom sera affiché dans l'application",onb1_placeholder:"Prénom",onb1_btn:"Continuer",
+  onb2_title:"Choisis ta langue",onb2_btn:"Terminé",tab_basic:"BASIQUE",tab_sci:"SCIENTIF.",tab_conv:"CONVERT.",tab_hist:"HISTORIQUE",
+  explain_btn:"Expliquer",explain_sheet_title:"Explication",explain_thinking:"Réflexion…",explain_builtin_src:"Explication intégrée",explain_ai_src:"Explication IA",
+  hist_empty:"Aucun calcul pour l'instant",hist_clear:"Effacer l'historique",conv_from:"DE",conv_to:"VERS",profile_prompt:"Ton prénom ?",guest:"Invité",
+  cat_currency:"Devise",cat_temperature:"Température",cat_length:"Longueur",cat_weight:"Poids",cat_volume:"Volume",cat_area:"Surface",cat_speed:"Vitesse",cat_time:"Temps",cat_data:"Données",
+  conv_rate_note:"le taux peut être imprécis",explain_empty:"L'écran affiche actuellement {r}. Saisis des nombres et une opération, puis retape sur « Expliquer ».",explain_base:"{b}. En clair : la calculatrice a appliqué cette opération à tes nombres et a obtenu {r}."},
+ es:{onb1_title:"¿Cómo te llamas?",onb1_sub:"Tu nombre se mostrará en la aplicación",onb1_placeholder:"Nombre",onb1_btn:"Continuar",
+  onb2_title:"Elige tu idioma",onb2_btn:"Listo",tab_basic:"BÁSICA",tab_sci:"CIENTÍF.",tab_conv:"CONVERSOR",tab_hist:"HISTORIAL",
+  explain_btn:"Explicar",explain_sheet_title:"Explicación",explain_thinking:"Pensando…",explain_builtin_src:"Explicación integrada",explain_ai_src:"Explicación IA",
+  hist_empty:"Aún no hay cálculos",hist_clear:"Borrar historial",conv_from:"DE",conv_to:"A",profile_prompt:"¿Tu nombre?",guest:"Invitado",
+  cat_currency:"Moneda",cat_temperature:"Temperatura",cat_length:"Longitud",cat_weight:"Peso",cat_volume:"Volumen",cat_area:"Área",cat_speed:"Velocidad",cat_time:"Tiempo",cat_data:"Datos",
+  conv_rate_note:"la tasa puede ser inexacta",explain_empty:"La pantalla muestra actualmente {r}. Introduce números y una operación, luego pulsa «Explicar» de nuevo.",explain_base:"{b}. En pocas palabras: la calculadora aplicó esa operación a tus números y obtuvo {r}."},
+ pl:{onb1_title:"Jak masz na imię?",onb1_sub:"Twoje imię będzie widoczne w aplikacji",onb1_placeholder:"Imię",onb1_btn:"Dalej",
+  onb2_title:"Wybierz język",onb2_btn:"Gotowe",tab_basic:"PODSTAW.",tab_sci:"NAUKOWY",tab_conv:"PRZELICZ.",tab_hist:"HISTORIA",
+  explain_btn:"Wyjaśnij",explain_sheet_title:"Wyjaśnienie",explain_thinking:"Myślę…",explain_builtin_src:"Wbudowane wyjaśnienie",explain_ai_src:"Wyjaśnienie AI",
+  hist_empty:"Brak obliczeń",hist_clear:"Wyczyść historię",conv_from:"Z",conv_to:"NA",profile_prompt:"Twoje imię?",guest:"Gość",
+  cat_currency:"Waluta",cat_temperature:"Temperatura",cat_length:"Długość",cat_weight:"Waga",cat_volume:"Objętość",cat_area:"Powierzchnia",cat_speed:"Prędkość",cat_time:"Czas",cat_data:"Dane",
+  conv_rate_note:"kurs może być niedokładny",explain_empty:"Wyświetlacz pokazuje teraz {r}. Wpisz liczby i działanie, a potem ponownie dotknij „Wyjaśnij”.",explain_base:"{b}. Mówiąc prosto: kalkulator zastosował to działanie do twoich liczb i otrzymał {r}."},
+ it:{onb1_title:"Come ti chiami?",onb1_sub:"Il tuo nome sarà mostrato nell'app",onb1_placeholder:"Nome",onb1_btn:"Continua",
+  onb2_title:"Scegli la lingua",onb2_btn:"Fatto",tab_basic:"BASE",tab_sci:"SCIENTIF.",tab_conv:"CONVERTI",tab_hist:"CRONOLOG.",
+  explain_btn:"Spiega",explain_sheet_title:"Spiegazione",explain_thinking:"Sto pensando…",explain_builtin_src:"Spiegazione integrata",explain_ai_src:"Spiegazione IA",
+  hist_empty:"Ancora nessun calcolo",hist_clear:"Cancella cronologia",conv_from:"DA",conv_to:"A",profile_prompt:"Il tuo nome?",guest:"Ospite",
+  cat_currency:"Valuta",cat_temperature:"Temperatura",cat_length:"Lunghezza",cat_weight:"Peso",cat_volume:"Volume",cat_area:"Area",cat_speed:"Velocità",cat_time:"Tempo",cat_data:"Dati",
+  conv_rate_note:"il tasso potrebbe non essere preciso",explain_empty:"Il display mostra attualmente {r}. Inserisci numeri e un'operazione, poi tocca di nuovo «Spiega».",explain_base:"{b}. In parole semplici: la calcolatrice ha applicato questa operazione ai tuoi numeri ottenendo {r}."},
+ pt:{onb1_title:"Qual é o seu nome?",onb1_sub:"O seu nome será exibido no aplicativo",onb1_placeholder:"Nome",onb1_btn:"Continuar",
+  onb2_title:"Escolha o idioma",onb2_btn:"Concluído",tab_basic:"BÁSICA",tab_sci:"CIENTÍF.",tab_conv:"CONVERSOR",tab_hist:"HISTÓRICO",
+  explain_btn:"Explicar",explain_sheet_title:"Explicação",explain_thinking:"Pensando…",explain_builtin_src:"Explicação integrada",explain_ai_src:"Explicação de IA",
+  hist_empty:"Ainda sem cálculos",hist_clear:"Limpar histórico",conv_from:"DE",conv_to:"PARA",profile_prompt:"Seu nome?",guest:"Convidado",
+  cat_currency:"Moeda",cat_temperature:"Temperatura",cat_length:"Comprimento",cat_weight:"Peso",cat_volume:"Volume",cat_area:"Área",cat_speed:"Velocidade",cat_time:"Tempo",cat_data:"Dados",
+  conv_rate_note:"a taxa pode ser imprecisa",explain_empty:"O visor mostra atualmente {r}. Digite números e uma operação, depois toque em «Explicar» novamente.",explain_base:"{b}. Em termos simples: a calculadora aplicou essa operação aos seus números e chegou a {r}."},
+ tr:{onb1_title:"Adın ne?",onb1_sub:"Adın uygulamada gösterilecek",onb1_placeholder:"Ad",onb1_btn:"Devam et",
+  onb2_title:"Dilini seç",onb2_btn:"Bitti",tab_basic:"TEMEL",tab_sci:"BİLİMSEL",tab_conv:"DÖNÜŞTÜR",tab_hist:"GEÇMİŞ",
+  explain_btn:"Açıkla",explain_sheet_title:"Açıklama",explain_thinking:"Düşünüyor…",explain_builtin_src:"Yerleşik açıklama",explain_ai_src:"YZ açıklaması",
+  hist_empty:"Henüz hesaplama yok",hist_clear:"Geçmişi temizle",conv_from:"DEN",conv_to:"E",profile_prompt:"Adın ne?",guest:"Misafir",
+  cat_currency:"Para birimi",cat_temperature:"Sıcaklık",cat_length:"Uzunluk",cat_weight:"Ağırlık",cat_volume:"Hacim",cat_area:"Alan",cat_speed:"Hız",cat_time:"Zaman",cat_data:"Veri",
+  conv_rate_note:"kur yanlış olabilir",explain_empty:"Ekranda şu anda {r} görünüyor. Sayıları ve bir işlemi girip tekrar «Açıkla»ya dokun.",explain_base:"{b}. Basitçe: hesap makinesi bu işlemi sayılarına uyguladı ve {r} sonucuna ulaştı."},
+ zh:{onb1_title:"你叫什么名字？",onb1_sub:"你的名字将显示在应用中",onb1_placeholder:"姓名",onb1_btn:"继续",
+  onb2_title:"选择语言",onb2_btn:"完成",tab_basic:"基础",tab_sci:"科学",tab_conv:"换算",tab_hist:"历史",
+  explain_btn:"解释",explain_sheet_title:"解释",explain_thinking:"思考中…",explain_builtin_src:"内置解释",explain_ai_src:"AI 解释",
+  hist_empty:"暂无计算记录",hist_clear:"清除历史",conv_from:"从",conv_to:"到",profile_prompt:"你的名字？",guest:"访客",
+  cat_currency:"货币",cat_temperature:"温度",cat_length:"长度",cat_weight:"重量",cat_volume:"体积",cat_area:"面积",cat_speed:"速度",cat_time:"时间",cat_data:"数据",
+  conv_rate_note:"汇率可能不准确",explain_empty:"屏幕当前显示 {r}。输入数字和运算后再次点击「解释」。",explain_base:"{b}。简单来说：计算器对你的数字执行了该运算，得到 {r}。"},
+ ja:{onb1_title:"お名前は？",onb1_sub:"お名前はアプリ内に表示されます",onb1_placeholder:"名前",onb1_btn:"続ける",
+  onb2_title:"言語を選択",onb2_btn:"完了",tab_basic:"ベーシック",tab_sci:"関数",tab_conv:"変換",tab_hist:"履歴",
+  explain_btn:"説明",explain_sheet_title:"説明",explain_thinking:"考え中…",explain_builtin_src:"内蔵の説明",explain_ai_src:"AIによる説明",
+  hist_empty:"まだ計算履歴はありません",hist_clear:"履歴を消去",conv_from:"変換元",conv_to:"変換先",profile_prompt:"お名前は？",guest:"ゲスト",
+  cat_currency:"通貨",cat_temperature:"温度",cat_length:"長さ",cat_weight:"重さ",cat_volume:"体積",cat_area:"面積",cat_speed:"速度",cat_time:"時間",cat_data:"データ",
+  conv_rate_note:"レートは不正確な場合があります",explain_empty:"現在の表示は {r} です。数字と演算を入力してから、もう一度「説明」をタップしてください。",explain_base:"{b}。簡単に言うと、電卓はその演算をあなたの数字に適用し、{r} という結果になりました。"},
+};
+let curLangCode='en';
+function T(){return I18N[curLangCode]||I18N.en}
+function tr(str,vars){let s=str;if(vars)for(const k in vars)s=s.split('{'+k+'}').join(vars[k]);return s}
+
+function renderLangList(sel,selCode,onPick){
+ $(sel).innerHTML=LANGUAGES.map((c,i)=>`<div class="lr${c[2]===selCode?' sel':''}" data-i="${i}"><div><b>${c[0]}</b><br><small>${c[1]}</small></div><span class="rd"></span></div>`).join('');
+ $(sel).onclick=e=>{const b=e.target.closest('.lr');if(!b)return;
+  [...document.querySelectorAll(sel+' .lr')].forEach(x=>x.classList.remove('sel'));b.classList.add('sel');
+  onPick(LANGUAGES[+b.dataset.i])};
+}
+let chosenLang=null;
+renderLangList('#langList',null,c=>chosenLang=c);
+
+function applyTranslations(code){
+ curLangCode=code;const d=T();
+ document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(d[k]!=null)el.textContent=d[k]});
+ document.querySelectorAll('[data-i18n-ph]').forEach(el=>{const k=el.dataset.i18nPh;if(d[k]!=null)el.placeholder=d[k]});
+ if(typeof renderCatRow==='function')renderCatRow();
+ if(typeof renderHist==='function')renderHist();
+}
+
+function show(id){['onb1','onb2','app'].forEach(s=>$('#'+s).classList.toggle('on',s===id))
+ if(id==='onb1')typeAnim($('#onb1Title'),T().onb1_title);
+ if(id==='onb2')typeAnim($('#lt'),T().onb2_title)}
+const savedNick=localStorage.getItem('calcNick'),savedLang=localStorage.getItem('calcLanguage');
+
+$('#onb1next').onclick=()=>{const n=$('#nickIn').value.trim();if(!n)return;localStorage.setItem('calcNick',n);show('onb2')};
+$('#onb2next').onclick=()=>{if(!chosenLang)chosenLang=LANGUAGES[0];localStorage.setItem('calcLanguage',JSON.stringify(chosenLang));
+ applyTranslations(chosenLang[2]);
+ $('#pNick').textContent=localStorage.getItem('calcNick');$('#pFlag').textContent=chosenLang[2].toUpperCase();show('app');initConv('USD')};
+$('#profBtn').onclick=()=>{const n=prompt(T().profile_prompt,localStorage.getItem('calcNick')||'');if(n){localStorage.setItem('calcNick',n);$('#pNick').textContent=n}};
+
+/* ===== language switcher (post-onboarding) ===== */
+$('#langBtn').onclick=()=>{
+ renderLangList('#langList2',curLangCode,c=>{
+  localStorage.setItem('calcLanguage',JSON.stringify(c));
+  applyTranslations(c[2]);$('#pFlag').textContent=c[2].toUpperCase();
+  closeSheets();
+ });
+ $('#langSheet').classList.add('on');$('#backdrop').classList.add('on');
+};
+$('#langClose').onclick=closeSheets;
+function closeSheets(){$('#langSheet').classList.remove('on');$('#expPanel').classList.remove('on');$('#backdrop').classList.remove('on')}
+
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+ document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));$('#pg-'+t.dataset.p).classList.add('on')});
+
+/* ===== calculator engine (shared, works for both basic & sci pages via suffix) ===== */
+function mkCalc(suf){
+ let acc=null,op=null,cur='0',fresh=false,M=0,deg=true,sec=false;
+ const disp=$('#mainDisp'+suf),exprEl=$('#exprLine'+suf),expEl=$('#explain'+suf);
+ const fmt=n=>{if(!isFinite(n))return'Error';let s=+n.toPrecision(10);return String(s)};
+ const D=()=>disp.textContent=cur.length>11?(+cur).toExponential(4):cur;
+ const EL=t=>exprEl.textContent=t; const EX=t=>expEl.textContent=t||'';
+ function compute(a,o,b){switch(o){case'+':return a+b;case'-':return a-b;case'×':return a*b;
+  case'÷':return b===0?NaN:a/b;case'^':return Math.pow(a,b);case'mod':return a%b;
+  case'yroot':return Math.pow(a,1/b);case'gcd':{a=Math.round(a);b=Math.round(b);while(b){[a,b]=[b,a%b]}return Math.abs(a)}
+  case'lcm':{const g=compute(a,'gcd',b);return Math.abs(a*b)/g}}}
+ function digit(d){if(fresh||cur==='0'&&d!=='.'){cur=(d==='.')?'0.':d;fresh=false}
+  else{if(d==='.'&&cur.includes('.'))return;cur+=d}D()}
+ function pressOp(o){if(op&&!fresh){acc=compute(acc,op,parseFloat(cur))}else{acc=parseFloat(cur)}
+  op=o;fresh=true;EL(fmt(acc)+' '+o);cur=fmt(acc);D();EX('')}
+ function equals(){if(op==null)return;const b=parseFloat(cur),a=acc,o=op,r=compute(a,o,b);
+  EL(fmt(a)+' '+o+' '+fmt(b)+' =');cur=fmt(r);
+  if(['^','mod','yroot','gcd','lcm'].includes(o)){const names={'^':'power','mod':'remainder','yroot':'root of degree','gcd':'GCD','lcm':'LCM'};
+   EX(`${fmt(a)} ${o} ${fmt(b)} = ${fmt(r)} — ${names[o]}`)}else EX('');
+  if(typeof pushHist==='function')pushHist(fmt(a)+' '+o+' '+fmt(b)+' =',fmt(r));
+  op=null;acc=null;fresh=true;D()}
+ function ac(){acc=null;op=null;cur='0';fresh=false;EL('');EX('');D()}
+ function back(){cur=cur.length>1?cur.slice(0,-1):'0';D()}
+ function pm(){cur=fmt(-parseFloat(cur));D()}
+ function pct(){cur=fmt(parseFloat(cur)/100);D()}
+ const RAD=v=>deg?v*Math.PI/180:v, DEG=v=>deg?v*180/Math.PI:v;
+ const uf={
+  sqrt:v=>({r:Math.sqrt(v),t:`√${fmt(v)} = ${fmt(Math.sqrt(v))} — square root`}),
+  cbrt:v=>({r:Math.cbrt(v),t:`∛${fmt(v)} = ${fmt(Math.cbrt(v))} — cube root`}),
+  sq:v=>({r:v*v,t:`${fmt(v)}² = ${fmt(v*v)} — square of the number`}),
+  cube:v=>({r:v*v*v,t:`${fmt(v)}³ = ${fmt(v*v*v)} — cube of the number`}),
+  inv:v=>({r:1/v,t:`1/${fmt(v)} = ${fmt(1/v)} — reciprocal`}),
+  abs:v=>({r:Math.abs(v),t:`|${fmt(v)}| = ${fmt(Math.abs(v))} — absolute value`}),
+  ln:v=>({r:Math.log(v),t:`ln(${fmt(v)}) = ${fmt(Math.log(v))} — natural logarithm`}),
+  log:v=>({r:Math.log10(v),t:`log(${fmt(v)}) = ${fmt(Math.log10(v))} — decimal logarithm`}),
+  exp:v=>({r:Math.exp(v),t:`e^${fmt(v)} = ${fmt(Math.exp(v))}`}),
+  pow10:v=>({r:Math.pow(10,v),t:`10^${fmt(v)} = ${fmt(Math.pow(10,v))}`}),
+  fact:v=>{v=Math.round(v);let f=1;for(let i=2;i<=v;i++)f*=i;return{r:f,t:`${v}! = ${fmt(f)} — factorial`}},
+  floor:v=>({r:Math.floor(v),t:`⌊${fmt(v)}⌋ = ${Math.floor(v)} — round down`}),
+  ceil:v=>({r:Math.ceil(v),t:`⌈${fmt(v)}⌉ = ${Math.ceil(v)} — round up`}),
+  round:v=>({r:Math.round(v),t:`round(${fmt(v)}) = ${Math.round(v)}`}),
+  sign:v=>({r:Math.sign(v),t:`sign(${fmt(v)}) = ${Math.sign(v)} — sign of the number`}),
+  sin:v=>sec?{r:DEG(Math.asin(v)),t:`asin(${fmt(v)}) = ${fmt(DEG(Math.asin(v)))}°`}:{r:Math.sin(RAD(v)),t:`sin(${fmt(v)}°) = ${fmt(Math.sin(RAD(v)))}`},
+  cos:v=>sec?{r:DEG(Math.acos(v)),t:`acos(${fmt(v)}) = ${fmt(DEG(Math.acos(v)))}°`}:{r:Math.cos(RAD(v)),t:`cos(${fmt(v)}°) = ${fmt(Math.cos(RAD(v)))}`},
+  tan:v=>sec?{r:DEG(Math.atan(v)),t:`atan(${fmt(v)}) = ${fmt(DEG(Math.atan(v)))}°`}:{r:Math.tan(RAD(v)),t:`tan(${fmt(v)}°) = ${fmt(Math.tan(RAD(v)))}`},
+  sinh:v=>sec?{r:Math.asinh(v),t:`asinh(${fmt(v)}) = ${fmt(Math.asinh(v))}`}:{r:Math.sinh(v),t:`sinh(${fmt(v)}) = ${fmt(Math.sinh(v))}`},
+  cosh:v=>sec?{r:Math.acosh(v),t:`acosh(${fmt(v)}) = ${fmt(Math.acosh(v))}`}:{r:Math.cosh(v),t:`cosh(${fmt(v)}) = ${fmt(Math.cosh(v))}`},
+  tanh:v=>sec?{r:Math.atanh(v),t:`atanh(${fmt(v)}) = ${fmt(Math.atanh(v))}`}:{r:Math.tanh(v),t:`tanh(${fmt(v)}) = ${fmt(Math.tanh(v))}`},
+ };
+ function unary(key){const v=parseFloat(cur),{r,t}=uf[key](v);cur=fmt(r);fresh=true;D();EX(t);
+  if(typeof pushHist==='function')pushHist(t,fmt(r))}
+ function konst(v,label){cur=fmt(v);fresh=true;D();EX(`${label} = ${fmt(v)}`)}
+ function rnd(){cur=fmt(Math.random());fresh=true;D();EX('Random number from 0 to 1')}
+ function memo(k){const v=parseFloat(cur);if(k==='m+')M+=v;if(k==='m-')M-=v;if(k==='mr'){cur=fmt(M);fresh=true;D()}if(k==='mc')M=0}
+ return{digit,pressOp,equals,ac,back,pm,pct,unary,konst,rnd,memo,
+  toggleSec(btn){sec=!sec;btn.classList.toggle('active')},
+  toggleDeg(btn){deg=!deg;btn.textContent=deg?'Deg':'Rad'}};
+}
+const C1=mkCalc(''), C2=mkCalc('2');
+
+function attach(id,C,defs){const el=$(id);el.innerHTML=defs.map(b=>`<button class="${b[2]}">${b[0]}</button>`).join('');
+ [...el.children].forEach((btn,i)=>btn.onclick=function(){defs[i][3](C,this)})}
+
+const BD=[
+ ['AC',,'fn',C=>C.ac()],['+/-',,'fn',C=>C.pm()],['%',,'fn',C=>C.pct()],['÷',,'op',C=>C.pressOp('÷')],
+ ['7',,'num',C=>C.digit('7')],['8',,'num',C=>C.digit('8')],['9',,'num',C=>C.digit('9')],['×',,'op',C=>C.pressOp('×')],
+ ['4',,'num',C=>C.digit('4')],['5',,'num',C=>C.digit('5')],['6',,'num',C=>C.digit('6')],['−',,'op',C=>C.pressOp('-')],
+ ['1',,'num',C=>C.digit('1')],['2',,'num',C=>C.digit('2')],['3',,'num',C=>C.digit('3')],['+',,'op',C=>C.pressOp('+')],
+ ['⌫',,'fn',C=>C.back()],['0',,'num',C=>C.digit('0')],['.',,'num',C=>C.digit('.')],['=',,'eq',C=>C.equals()],
+];
+const SD=[
+ ['2nd',,'fn',(C,b)=>C.toggleSec(b)],['Deg',,'fn',(C,b)=>C.toggleDeg(b)],['mod',,'fn',C=>C.pressOp('mod')],['xʸ',,'fn',C=>C.pressOp('^')],
+ ['x²',,'fn',C=>C.unary('sq')],['x³',,'fn',C=>C.unary('cube')],['√x',,'fn',C=>C.unary('sqrt')],['∛x',,'fn',C=>C.unary('cbrt')],
+ ['1/x',,'fn',C=>C.unary('inv')],['|x|',,'fn',C=>C.unary('abs')],['n!',,'fn',C=>C.unary('fact')],['ʸ√x',,'fn',C=>C.pressOp('yroot')],
+ ['ln',,'fn',C=>C.unary('ln')],['log',,'fn',C=>C.unary('log')],['eˣ',,'fn',C=>C.unary('exp')],['10ˣ',,'fn',C=>C.unary('pow10')],
+ ['sin',,'fn',C=>C.unary('sin')],['cos',,'fn',C=>C.unary('cos')],['tan',,'fn',C=>C.unary('tan')],['π',,'fn',C=>C.konst(Math.PI,'π')],
+ ['sinh',,'fn',C=>C.unary('sinh')],['cosh',,'fn',C=>C.unary('cosh')],['tanh',,'fn',C=>C.unary('tanh')],['e',,'fn',C=>C.konst(Math.E,'e')],
+ ['⌊x⌋',,'fn',C=>C.unary('floor')],['⌈x⌉',,'fn',C=>C.unary('ceil')],['round',,'fn',C=>C.unary('round')],['sign',,'fn',C=>C.unary('sign')],
+ ['mc',,'fn',C=>C.memo('mc')],['m+',,'fn',C=>C.memo('m+')],['m-',,'fn',C=>C.memo('m-')],['mr',,'fn',C=>C.memo('mr')],
+ ['Rand',,'fn',C=>C.rnd()],['gcd',,'fn',C=>C.pressOp('gcd')],['lcm',,'fn',C=>C.pressOp('lcm')],['φ',,'fn',C=>C.konst(1.6180339887,'φ')],
+];
+attach('#basicGrid',C1,BD);
+attach('#basicGrid2',C2,BD); attach('#sciGridFull',C2,SD);
+
+/* ===== converter ===== */
+const CONV={
+ length:{labelKey:'cat_length',u:{'m':1,'km':1000,'cm':.01,'mm':.001,'mile':1609.34,'yard':.9144,'ft':.3048,'in':.0254}},
+ weight:{labelKey:'cat_weight',u:{'kg':1,'g':.001,'mg':.000001,'t':1000,'lb':.453592,'oz':.0283495}},
+ volume:{labelKey:'cat_volume',u:{'l':1,'ml':.001,'m³':1000,'gal':3.78541,'qt':.946353,'pt':.473176}},
+ area:{labelKey:'cat_area',u:{'m²':1,'km²':1e6,'cm²':1e-4,'ha':10000,'acre':4046.86}},
+ speed:{labelKey:'cat_speed',u:{'m/s':1,'km/h':.277778,'mph':.44704,'knot':.514444}},
+ time:{labelKey:'cat_time',u:{'sec':1,'min':60,'hour':3600,'day':86400,'week':604800,'month':2628000,'year':31536000}},
+ data:{labelKey:'cat_data',u:{'bit':.125,'byte':1,'KB':1024,'MB':1048576,'GB':1073741824,'TB':1099511627776}},
+};
+const TEMPU=['°C','°F','K'];
+function toC(v,u){return u==='°C'?v:u==='°F'?(v-32)*5/9:v-273.15}
+function fromC(v,u){return u==='°C'?v:u==='°F'?v*9/5+32:v+273.15}
+let RATES={USD:1,EUR:.92,GBP:.79,UAH:41.5,PLN:4.0,CZK:23.5,TRY:34.2,CNY:7.25,JPY:149,INR:83.4,CAD:1.37,AUD:1.53,CHF:.88,SEK:10.4,NOK:10.6,KZT:478,GEL:2.68,ILS:3.72,AED:3.67,BRL:5.15};
+fetch('https://open.er-api.com/v6/latest/USD').then(r=>r.json()).then(d=>{if(d&&d.rates){for(const k in RATES)if(d.rates[k])RATES[k]=d.rates[k];if(curCat==='currency')renderCat()}}).catch(()=>{});
+const CURR=Object.keys(RATES);
+let curCat='currency',homeCurr='USD';
+function initConv(currCode){homeCurr=currCode||'USD';renderCatRow();renderCat()}
+function renderCatRow(){const d=T();const list=[['currency',d.cat_currency],['temperature',d.cat_temperature],...Object.keys(CONV).map(k=>[k,d[CONV[k].labelKey]])];
+ $('#catRow').innerHTML=list.map(c=>`<div class="cat${c[0]===curCat?' on':''}" data-c="${c[0]}">${c[1]}</div>`).join('');
+ [...document.querySelectorAll('.cat')].forEach(el=>el.onclick=()=>{curCat=el.dataset.c;renderCatRow();renderCat()})}
+function unitsFor(cat){if(cat==='currency')return CURR;if(cat==='temperature')return TEMPU;return Object.keys(CONV[cat].u)}
+function renderCat(){const units=unitsFor(curCat);
+ $('#unFrom').innerHTML=units.map(u=>`<option${u===(curCat==='currency'?homeCurr:units[0])?' selected':''}>${u}</option>`).join('');
+ $('#unTo').innerHTML=units.map(u=>`<option${u===(curCat==='currency'?(homeCurr==='USD'?'EUR':'USD'):units[1]||units[0])?' selected':''}>${u}</option>`).join('');
+ $('#cvFrom').value='1';doConv()}
+function doConv(){const v=parseFloat($('#cvFrom').value)||0,f=$('#unFrom').value,t=$('#unTo').value;let r;
+ if(curCat==='currency'){r=v*(RATES[t]/RATES[f]);$('#convExplain').textContent=`1 ${f} ≈ ${(RATES[t]/RATES[f]).toFixed(4)} ${t} · ${T().conv_rate_note}`}
+ else if(curCat==='temperature'){r=fromC(toC(v,f),t);$('#convExplain').textContent=`${v}${f} = ${r.toFixed(2)}${t}`}
+ else{const u=CONV[curCat].u;r=v*u[f]/u[t];$('#convExplain').textContent=`1 ${f} = ${(u[f]/u[t]).toPrecision(6)} ${t}`}
+ $('#cvTo').value=isFinite(r)?(+r.toPrecision(8)):'Error'}
+$('#cvFrom').oninput=doConv;$('#unFrom').onchange=doConv;$('#unTo').onchange=doConv;
+$('#swapBtn').onclick=()=>{const f=$('#unFrom').value,t=$('#unTo').value;$('#unFrom').value=t;$('#unTo').value=f;doConv()};
+
+/* ===== calculation history ===== */
+let HIST=[];
+try{HIST=JSON.parse(localStorage.getItem('calcHistory')||'[]')}catch(e){HIST=[]}
+function saveHist(){localStorage.setItem('calcHistory',JSON.stringify(HIST))}
+function pushHist(expr,result){HIST.unshift({e:expr,r:result});if(HIST.length>60)HIST.length=60;saveHist();renderHist()}
+function renderHist(){const w=$('#histList');
+ if(!HIST.length){w.innerHTML='<div class="histEmpty">'+T().hist_empty+'</div>';return}
+ w.innerHTML=HIST.map((h,i)=>`<div class="hrow" data-i="${i}"><div style="min-width:0"><div class="he">${h.e}</div><div class="hr">${h.r}</div></div><button data-del="${i}">✕</button></div>`).join('')}
+$('#histList').onclick=e=>{const del=e.target.closest('[data-del]');
+ if(del){HIST.splice(+del.dataset.del,1);saveHist();renderHist();return}
+ const row=e.target.closest('.hrow');if(!row)return;const h=HIST[+row.dataset.i];
+ C1.ac();$('#mainDisp').textContent=h.r;
+ document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.p==='basic'));
+ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='pg-basic'))};
+$('#histClear').onclick=()=>{HIST=[];saveHist();renderHist()};
+renderHist();
+
+/* ===== explain panel: built-in explainer, with an optional real AI backend ===== */
+function localExplain(expr,detail,result){
+ const d=T();
+ if(!expr&&!detail)return tr(d.explain_empty,{r:result});
+ const base=detail||expr;
+ return tr(d.explain_base,{b:base,r:result});
+}
+async function aiExplain(expr,detail,result){
+ const prompt=`Explain this calculator step in 2-3 short, simple sentences for a general audience. Expression: ${expr||'(direct entry)'}. Detail: ${detail||'-'}. Result: ${result}.`;
+ const r=await fetch('/api/explain',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt})});
+ if(!r.ok)throw new Error('bad status');
+ const d=await r.json();
+ if(!d||!d.text)throw new Error('empty');
+ return d.text;
+}
+function openExplain(suf){
+ const expr=$('#exprLine'+suf).textContent,detail=$('#explain'+suf).textContent,result=$('#mainDisp'+suf).textContent;
+ $('#expBody').textContent=T().explain_thinking;$('#expSrc').textContent='';
+ $('#expPanel').classList.add('on');$('#backdrop').classList.add('on');
+ aiExplain(expr,detail,result).then(txt=>{$('#expBody').textContent=txt;$('#expSrc').textContent=T().explain_ai_src})
+  .catch(()=>{$('#expBody').textContent=localExplain(expr,detail,result);$('#expSrc').textContent=T().explain_builtin_src});
+}
+function closeExplain(){closeSheets()}
+$('#expClose').onclick=closeExplain;
+$('#backdrop').onclick=closeExplain;
+
+/* ---------- start: splash -> onboarding or app ---------- */
+setTimeout(()=>{$('#sp').classList.add('off');setTimeout(()=>{
+ if(savedNick&&savedLang){const c=JSON.parse(savedLang);applyTranslations(c[2]);$('#pNick').textContent=savedNick;$('#pFlag').textContent=c[2].toUpperCase();show('app');initConv('USD')}
+ else{applyTranslations('en');show('onb1')}},800)},1500);
+</script>
+</body></html>
